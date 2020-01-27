@@ -39,8 +39,8 @@ typedef struct {
     gpio_value_t value;
 }GPIO_t;
 
-int GPIO_Init(GPIO_t* instance);
-int GPIO_Init(GPIO_t* instance,\
+int GPIO_Init_Default(GPIO_t* instance);
+int GPIO_Init_Custom(GPIO_t* instance,\
             int number, direction_t dir,\
             active_low_t act, gpio_value_t initVal);
 

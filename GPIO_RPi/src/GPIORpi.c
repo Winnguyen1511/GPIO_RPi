@@ -1,14 +1,14 @@
 #include "GPIORpi.h"
 
-int GPIO_Init(GPIO_t* instance)
+int GPIO_Init_Default(GPIO_t* instance)
 {
     //Default init name, gpio_number, 
     //auto export the gpio
     //default set at output
     //default set value to HIGH
 }
-int GPIO_Init(GPIO_t* instance,
-            int number, direction_t dir,
+int GPIO_Init_Custom(GPIO_t* instance,\
+            int number, direction_t dir,\
             active_low_t act, gpio_value_t initVal)
 {
     //Init name, gpio_number
