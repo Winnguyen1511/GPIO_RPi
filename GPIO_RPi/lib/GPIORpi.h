@@ -18,7 +18,7 @@
 #define DIRECTION   "/direction"
 #define ACTIVE_LOW  "/active_low"
 #define VALUE       "/value"
-#define SUCCESS     0
+#define SUCCESS     1
 #define ERROR       -1
 #define TRUE        1
 #define FALSE       0
