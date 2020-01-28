@@ -7,9 +7,9 @@ int GPIO_Init_Default(GPIO_t* instance, int number)
     //default set at output
     //default set value to HIGH
     char name[MAX_NAME_SIZE], number_char[MAX_PIN_SIZE];
-    strcmp(name, GPIO_PREFIX);
+    strcat(name, GPIO_PREFIX);
     sprintf(number_char, "%d", number);
-    strcmp(name, number_char);
+    strcat(name, number_char);
     instance->name = (char*)malloc(MAX_NAME_SIZE *(sizeof(char)));
     strcpy(instance->name, name);
     instance->gpio_num = number;
@@ -191,15 +191,6 @@ int GPIO_get_active_low(GPIO_t* instance, active_low_t* retVal)
         printf("Error: ioctl get active low gpio%d\n", instance->gpio_num);
         return ERROR;
     }
-    //if( *retVal == instance->active_low)
-    // {
-    //     return SUCCESS;
-    // }
-    // else
-    // {
-    //     printf("Error: internal core error gpio%d\n", instance->gpio_num);
-    //     return ERROR;
-    // }
     return SUCCESS;
 }
 
@@ -215,15 +206,6 @@ int GPIO_get_value(GPIO_t* instance, gpio_value_t* retVal)
         printf("Error: ioctl get value gpio%d\n", instance->gpio_num);
         return ERROR;
     }
-    // if( *retVal == instance->value)
-    // {
-    //     return SUCCESS;
-    // }
-    // else
-    // {
-    //     printf("Error: internal core error gpio%d\n", instance->gpio_num);
-    //     return ERROR;
-    // }
     return SUCCESS;
 }
 int GPIO_get_export_status(GPIO_t* instance, export_t* retVal)
@@ -368,22 +350,49 @@ int ioctl_cmd(GPIO_t* instance, gpio_command_t cmd, void* val)
         switch (cmd)
         {
         case SET_DIR_CMD:
-            ret = (ioctl_cmd_set_dir(instance->gpio_num, *((direction_t*)val) )) ? SUCCESS : ERROR; 
+            ret = (ioctl_cmd_set_dir(instance->gpio_num, *((direction_t*)val) )) ? SUCCESS : ERROR;
+            if(ret == SUCCESS)
+            {
+                instance->direction = *((direction_t*)val);
+            } 
             break;
         case SET_ACTIVE_LOW_CMD:
             ret = (ioctl_cmd_set_active_low(instance->gpio_num, *((active_low_t*)val)))? SUCCESS : ERROR;
+            if(ret == SUCCESS)
+            {
+                instance->active_low = *((active_low_t*)val);
+            } 
             break;
         case SET_VALUE_CMD:
             ret = (ioctl_cmd_set_value(instance->gpio_num, *((gpio_value_t*)val)))? SUCCESS : ERROR;
+            if(ret == SUCCESS)
+            {
+                instance->value = *((gpio_value_t*)val);
+            }
             break;
         case GET_DIR_CMD:
             ret = (ioctl_cmd_get_dir(instance->gpio_num, (direction_t*)val))? SUCCESS : ERROR;
+            if(ret == SUCCESS)
+            {
+                if(instance->direction != *(direction_t*)val)
+                    ret = ERROR;
+            }
             break;
         case GET_ACTIVE_LOW_CMD:
             ret = (ioctl_cmd_get_active_low(instance->gpio_num, (active_low_t*)val)) ? SUCCESS : ERROR;
+            if(ret == SUCCESS)
+            {
+                if(instance->active_low != *(active_low_t*)val)
+                    ret = ERROR;
+            }
             break;
         case GET_VALUE_CMD:
             ret = (ioctl_cmd_get_value(instance->gpio_num, (gpio_value_t*)val)) ? SUCCESS : ERROR;
+            if(ret == SUCCESS)
+            {
+                if(instance->value != *(gpio_value_t*)val);
+                ret = ERROR;
+            }
             break;
         }
         if(ret == ERROR)
