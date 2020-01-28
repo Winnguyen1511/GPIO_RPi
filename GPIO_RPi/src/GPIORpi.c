@@ -444,6 +444,7 @@ int ioctl_cmd_export(int num)
     else size = 1;
     sprintf(number_char, "%d", num);
     strcat(path, EXPORT);
+    printf("%s\n", path);
     fd = open(path, FILE_FLAGS, FILE_PERMS);
     if(fd == -1)
     {
@@ -452,7 +453,7 @@ int ioctl_cmd_export(int num)
     }
     if(write(fd, number_char, size) != size)
     {
-        printf("Error : ioctl set export write file\n");
+        printf("Error : ioctl cmd export write file\n");
         return ERROR;
     }
     close(fd);
@@ -467,6 +468,7 @@ int ioctl_cmd_unexport(int num)
     else size = 1;
     sprintf(number_char, "%d", num);
     strcat(path, UNEXPORT);
+    printf("%s\n", path);
     fd = open(path, FILE_FLAGS, FILE_PERMS);
     if(fd == -1)
     {
@@ -492,6 +494,7 @@ int ioctl_cmd_set_dir(int num, direction_t dir)
     strcat(path, GPIO_PATH);
     strcat(path, name);
     strcat(path, DIRECTION);
+    printf("%s\n", path);
     char *str_val;
     if(dir == OUTPUT)
     {
@@ -530,6 +533,7 @@ int ioctl_cmd_set_value(int num, gpio_value_t val)
     strcat(path, GPIO_PATH);
     strcat(path, name);
     strcat(path, VALUE);
+    printf("%s\n", path);
     char str_val;
     fprintf(str_val, "%d", (int)val);
     fd = open(path, FILE_FLAGS, FILE_PERMS);
@@ -557,7 +561,8 @@ int ioctl_cmd_get_value(int num, gpio_value_t* val)
     strcat(path, GPIO_PATH);
     strcat(path, name);
     strcat(path, VALUE);
-     char str_val;
+        printf("%s\n", path);
+    char str_val;
     // fprintf(str_val, "%d", (int)val);
     fd = open(path, FILE_FLAGS, FILE_PERMS);
     if(fd == -1)
@@ -587,6 +592,7 @@ int ioctl_cmd_get_dir(int num, direction_t* val)
     strcat(path, GPIO_PATH);
     strcat(path, name);
     strcat(path, DIRECTION);
+        printf("%s\n", path);
     char str_val[size];
     fd = open(path, FILE_FLAGS, FILE_PERMS);
     if(fd == -1)
@@ -621,6 +627,7 @@ int ioctl_cmd_get_active_low(int num, active_low_t* val)
     strcat(path, GPIO_PATH);
     strcat(path, name);
     strcat(path, ACTIVE_LOW);
+        printf("%s\n", path);
     char str_val;
     // fprintf(str_val, "%d", (int)val);
     fd = open(path, FILE_FLAGS, FILE_PERMS);
