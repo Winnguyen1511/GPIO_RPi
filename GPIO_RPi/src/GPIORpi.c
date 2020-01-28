@@ -273,6 +273,7 @@ int ioctl_cmd(GPIO_t* instance, gpio_command_t cmd, void* val)
     if(cmd == EXPORT_CMD || cmd == UNEXPORT_CMD)
     {
         int dir_exist = ioctl_is_exported(instance->gpio_num);
+        printf("%d\n", dir_exist);
         if(cmd == EXPORT_CMD)
         {
             if(instance->export_status == UNEXPORTED)
