@@ -535,7 +535,7 @@ int ioctl_cmd_set_value(int num, gpio_value_t val)
     strcat(path, name);
     strcat(path, VALUE);
     printf("%s\n", path);
-    char str_val;
+    char str_val[1];
     sprintf(str_val, "%d", (int)val);
     fd = open(path, FILE_FLAGS, FILE_PERMS);
     if(fd == -1)
@@ -543,7 +543,7 @@ int ioctl_cmd_set_value(int num, gpio_value_t val)
         printf("Error: ioctl cmd set value open file\n");
         return ERROR;
     }
-    if(write(fd, &str_val, 1) != 1)
+    if(write(fd, str_val, 1) != 1)
     {
         printf("Error : ioctl set value write file\n");
         return ERROR;
