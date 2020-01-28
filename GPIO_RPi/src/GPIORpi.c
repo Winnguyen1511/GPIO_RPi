@@ -419,15 +419,16 @@ int ioctl_cmd_set_active_low(int num, active_low_t val)
     strcat(path, GPIO_PATH);
     strcat(path, name);
     strcat(path, ACTIVE_LOW);
-    char str_val;
-    fprintf(&str_val, "%d", (int)val);
+    char str_val[1];
+    sprintf(str_val, "%d" , (int)val);
+    //itoa()
     fd = open(path, FILE_FLAGS, FILE_PERMS);
     if(fd == -1)
     {
         printf("Error: ioctl cmd set active low open file\n");
         return ERROR;
     }
-    if(write(fd, &str_val, 1) != 1)
+    if(write(fd, str_val, 1) != 1)
     {
         printf("Error : ioctl set active low write file\n");
         return ERROR;
@@ -495,16 +496,16 @@ int ioctl_cmd_set_dir(int num, direction_t dir)
     strcat(path, name);
     strcat(path, DIRECTION);
     printf("%s\n", path);
-    char *str_val;
+    char str_val[3] = {0};
     if(dir == OUTPUT)
     {
         size = 3;
-        str_val = "out";
+        strcat(str_val, "out");
     }
     else
     {
         size = 2;
-        str_val = "in";
+        strcat(str_val, "in");
     }
         
     //fprintf(str_val, "%d", (int)val);
@@ -535,7 +536,7 @@ int ioctl_cmd_set_value(int num, gpio_value_t val)
     strcat(path, VALUE);
     printf("%s\n", path);
     char str_val;
-    fprintf(str_val, "%d", (int)val);
+    sprintf(str_val, "%d", (int)val);
     fd = open(path, FILE_FLAGS, FILE_PERMS);
     if(fd == -1)
     {
