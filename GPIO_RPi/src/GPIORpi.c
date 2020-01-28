@@ -6,6 +6,9 @@ int GPIO_Init_Default(GPIO_t* instance, int number)
     //auto export the gpio
     //default set at output
     //default set value to HIGH
+    instance->export_status = UNEXPORTED;
+    instance->active_low = HIGH_ACTIVE;
+    instance->value = HIGH;
     char name[MAX_NAME_SIZE], number_char[MAX_PIN_SIZE];
     strcat(name, GPIO_PREFIX);
     sprintf(number_char, "%d", number);
@@ -31,6 +34,7 @@ int GPIO_Init_Default(GPIO_t* instance, int number)
         printf("Error: Cannot set value gpio%d\n", instance->gpio_num);
         return ERROR;
     }
+
     return SUCCESS;
     
 }
@@ -38,6 +42,9 @@ int GPIO_Init_Custom(GPIO_t* instance,\
             int number, direction_t dir,\
             active_low_t act, gpio_value_t initVal)
 {
+    instance->export_status = UNEXPORTED;
+    instance->active_low = HIGH_ACTIVE;
+    instance->value = HIGH;
     //Init name, gpio_number
     //init all other properties 
     char name[MAX_NAME_SIZE] = {0}, number_char[MAX_PIN_SIZE] ={0};
