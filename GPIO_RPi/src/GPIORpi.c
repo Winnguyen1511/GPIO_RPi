@@ -283,9 +283,9 @@ int ioctl_cmd(GPIO_t* instance, gpio_command_t cmd, void* val)
                 }
             }
             else{
-                if(dir_exist == FALSE)
+                if(dir_exist == TRUE)
                 {
-                    printf("already unexported\n");
+                    printf("already exported\n");
                     return SUCCESS;
                 }
                 else{

@@ -23,8 +23,8 @@
 #define TRUE        1
 #define FALSE       0
 
-typedef enum export_enum{EXPORTED, UNEXPORTED}export_t;
-typedef enum direction_enum{INPUT, OUTPUT}direction_t;
+typedef enum export_enum{UNEXPORTED =0, EXPORTED}export_t;
+typedef enum direction_enum{OUTPUT=0, INPUT}direction_t;
 typedef enum active_low_enum{HIGH_ACTIVE=0, LOW_ACTIVE}active_low_t;
 typedef enum gpio_value_num{LOW=0, HIGH}gpio_value_t;
 typedef enum gpio_command_enum
