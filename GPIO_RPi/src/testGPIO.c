@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "GPIORpi.h"
-
+#include <unistd.h>
 int main(int argc, char** argv)
 {
     printf("Welcome to test GPIO program:\n");
@@ -13,6 +13,10 @@ int main(int argc, char** argv)
     GPIO_t gpio17;
     GPIO_Init_Custom(&gpio17, 17, OUTPUT, HIGH_ACTIVE, HIGH);
     //ioctl_cmd(&gpio17, EXPORT_CMD, NULL);
-    printf("%d\n", gpio17.export_status);
+    sleep(2);
+    GPIO_set_value(&gpio17, LOW);
+    printf("Info of gpio%d:\n",gpio17.gpio_num);
+    printf("num=%d, active_low=%d, dir=%d, value=%d\n",\
+	gpio17.gpio_num, gpio17.active_low, gpio17.direction, gpio17.value);
     return SUCCESS;
 }
