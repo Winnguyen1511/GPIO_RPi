@@ -273,7 +273,7 @@ int ioctl_cmd(GPIO_t* instance, gpio_command_t cmd, void* val)
     if(cmd == EXPORT_CMD || cmd == UNEXPORT_CMD)
     {
         int dir_exist = ioctl_is_exported(instance->gpio_num);
-        printf("%d\n", dir_exist);
+        //printf("%d\n", dir_exist);
         if(cmd == EXPORT_CMD)
         {
             if(instance->export_status == UNEXPORTED)
@@ -284,10 +284,10 @@ int ioctl_cmd(GPIO_t* instance, gpio_command_t cmd, void* val)
                     return SUCCESS;
                 }
                 else{
-                    printf("here\n");
+                    //printf("here\n");
                     if(!ioctl_cmd_export(instance->gpio_num))
                         return ERROR;
-                    printf("success\n");
+                    //printf("success\n");
                     instance->export_status = EXPORTED;
                     return SUCCESS;
                 }
@@ -490,7 +490,7 @@ int ioctl_cmd_export(int num)
     else size = 1;
     sprintf(number_char, "%d", num);
     strcat(path, EXPORT);
-    printf("%s\n", path);
+    //printf("%s\n", path);
     fd = open(path, FILE_FLAGS, FILE_PERMS);
     if(fd == -1)
     {
@@ -514,7 +514,7 @@ int ioctl_cmd_unexport(int num)
     else size = 1;
     sprintf(number_char, "%d", num);
     strcat(path, UNEXPORT);
-    printf("%s\n", path);
+    //printf("%s\n", path);
     fd = open(path, FILE_FLAGS, FILE_PERMS);
     if(fd == -1)
     {
@@ -540,7 +540,7 @@ int ioctl_cmd_set_dir(int num, direction_t dir)
     strcat(path, GPIO_PATH);
     strcat(path, name);
     strcat(path, DIRECTION);
-    printf("%s\n", path);
+    //printf("%s\n", path);
     char str_val[3] = {0};
     if(dir == OUTPUT)
     {
@@ -579,7 +579,7 @@ int ioctl_cmd_set_value(int num, gpio_value_t val)
     strcat(path, GPIO_PATH);
     strcat(path, name);
     strcat(path, VALUE);
-    printf("%s\n", path);
+    //printf("%s\n", path);
     char str_val[1];
     sprintf(str_val, "%d", (int)val);
     fd = open(path, FILE_FLAGS, FILE_PERMS);
@@ -607,7 +607,7 @@ int ioctl_cmd_get_value(int num, gpio_value_t* val)
     strcat(path, GPIO_PATH);
     strcat(path, name);
     strcat(path, VALUE);
-        printf("%s\n", path);
+        //printf("%s\n", path);
     char str_val;
     // fprintf(str_val, "%d", (int)val);
     fd = open(path, FILE_FLAGS, FILE_PERMS);
@@ -638,7 +638,7 @@ int ioctl_cmd_get_dir(int num, direction_t* val)
     strcat(path, GPIO_PATH);
     strcat(path, name);
     strcat(path, DIRECTION);
-        printf("%s\n", path);
+        //printf("%s\n", path);
     char str_val[size];
     fd = open(path, FILE_FLAGS, FILE_PERMS);
     if(fd == -1)
@@ -673,7 +673,7 @@ int ioctl_cmd_get_active_low(int num, active_low_t* val)
     strcat(path, GPIO_PATH);
     strcat(path, name);
     strcat(path, ACTIVE_LOW);
-        printf("%s\n", path);
+        //printf("%s\n", path);
     char str_val;
     // fprintf(str_val, "%d", (int)val);
     fd = open(path, FILE_FLAGS, FILE_PERMS);
