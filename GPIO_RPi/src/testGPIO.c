@@ -20,6 +20,9 @@ int main(int argc, char** argv)
 	        gpio17.gpio_num, gpio17.active_low, gpio17.direction, gpio17.value);
     sleep(2);
     GPIO_set_value(&gpio17, HIGH);
+    printf("num=%d, active_low=%d, dir=%d, value=%d\n",\
+	        gpio17.gpio_num, gpio17.active_low, gpio17.direction, gpio17.value);
+    sleep(2);
     GPIO_Denit(&gpio17);
     return SUCCESS;
 }
