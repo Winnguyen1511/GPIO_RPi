@@ -228,7 +228,7 @@ int GPIO_get_value(GPIO_t* instance, gpio_value_t* retVal)
 }
 int GPIO_get_export_status(GPIO_t* instance, export_t* retVal)
 {
-    int dirStat = ioctl_is_exported(instance);
+    int dirStat = ioctl_is_exported(instance->gpio_num);
     if((instance->export_status == EXPORTED)
         &&(dirStat == TRUE))
         *retVal = EXPORTED;
@@ -283,7 +283,7 @@ int ioctl_cmd(GPIO_t* instance, gpio_command_t cmd, void* val)
 
     if(cmd == EXPORT_CMD || cmd == UNEXPORT_CMD)
     {
-        int dir_exist = ioctl_is_exported(instance);
+        int dir_exist = ioctl_is_exported(instance->gpio_num);
         if(cmd == EXPORT_CMD)
         {
             if(instance->export_status == UNEXPORTED)
@@ -353,7 +353,7 @@ int ioctl_cmd(GPIO_t* instance, gpio_command_t cmd, void* val)
     else
     {
         export_t    tmpExport;
-        int dir_exist = ioctl_is_exported(instance);
+        int dir_exist = ioctl_is_exported(instance->gpio_num);
         if(dir_exist == TRUE)
             tmpExport = EXPORTED;
         else
@@ -392,11 +392,29 @@ int ioctl_cmd(GPIO_t* instance, gpio_command_t cmd, void* val)
     }
 
 }
-int ioctl_is_exported(GPIO_t* instance)
+int ioctl_is_exported(int num)
 {
     //check check in /sys/class/gpio/ are there /gpio_num or not ?
     //return TRUE if yes
     //else return FALSE
+    char name[MAX_NAME_SIZE] = {0}, number_char[MAX_PIN_SIZE] ={0};
+    strcat(name, GPIO_PREFIX);
+    sprintf(number_char, "%d", num);
+    strcat(name, number_char);
+    char path[MAX_PATH_SIZE]={0};
+    strcat(path, GPIO_PATH);
+    strcat(path, name);
+    struct stat sb;
+    if(stat(path, &sb) == 0 && S_ISDIR(sb.st_mode))
+    {
+        return TRUE;
+    }
+    else
+    {
+        return FALSE;
+    }
+    
+
 }
 
 //All below function directly run on file:
