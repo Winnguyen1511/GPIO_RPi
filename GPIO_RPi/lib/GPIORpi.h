@@ -68,7 +68,7 @@ int GPIO_get_active_low(GPIO_t* instance, active_low_t* retVal);
 
 int ioctl_cmd(GPIO_t* instance, gpio_command_t cmd, void* val);
 
-int ioctl_is_exported(GPIO_t* instance);
+int ioctl_is_exported(int num);
 int ioctl_cmd_export(int num);
 int ioctl_cmd_unexport(int num);
 int ioctl_cmd_set_active_low(int num, active_low_t val);
