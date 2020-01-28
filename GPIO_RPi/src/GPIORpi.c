@@ -289,7 +289,8 @@ int ioctl_cmd(GPIO_t* instance, gpio_command_t cmd, void* val)
                     return SUCCESS;
                 }
             }
-            else{
+            else if(instance->export_status == EXPORTED)
+            {
                 if(dir_exist == TRUE)
                 {
                     printf("already exported\n");
@@ -303,6 +304,9 @@ int ioctl_cmd(GPIO_t* instance, gpio_command_t cmd, void* val)
                     }
                     return SUCCESS;
                 }
+            }
+            else{
+                //do nothing
             }
         }
         else
@@ -321,7 +325,8 @@ int ioctl_cmd(GPIO_t* instance, gpio_command_t cmd, void* val)
                     return SUCCESS;
                 }
             }
-            else{
+            else if(instance->export_status == UNEXPORTED)
+            {
                 if(dir_exist == FALSE)
                 {
                     printf("already unexported\n");
@@ -335,6 +340,9 @@ int ioctl_cmd(GPIO_t* instance, gpio_command_t cmd, void* val)
                     }
                     return SUCCESS;
                 }
+            }
+            else{
+                //do nothing
             }
         }
             
