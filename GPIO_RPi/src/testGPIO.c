@@ -11,7 +11,8 @@ int main(int argc, char** argv)
     // ioctl_cmd_set_active_low(17, HIGH_ACTIVE);
     // ioctl_cmd_set_value(17, HIGH);
     GPIO_t gpio17;
-    GPIO_Init_Custom(&gpio17, 17, OUTPUT, HIGH_ACTIVE, HIGH);
-    //ioctl_cmd(&gpio17, EXPORT_CMD, NULL);
+    //GPIO_Init_Custom(&gpio17, 17, OUTPUT, HIGH_ACTIVE, HIGH);
+    ioctl_cmd(&gpio17, EXPORT_CMD, NULL);
+    printf("%d\n", gpio17.export_status);
     return SUCCESS;
 }
