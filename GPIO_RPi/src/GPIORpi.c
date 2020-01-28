@@ -284,6 +284,7 @@ int ioctl_cmd(GPIO_t* instance, gpio_command_t cmd, void* val)
                     return SUCCESS;
                 }
                 else{
+                    printf("here\n");
                     if(!ioctl_cmd_export(instance->gpio_num))
                         return ERROR;
                     instance->export_status = EXPORTED;
