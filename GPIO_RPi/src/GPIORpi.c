@@ -479,12 +479,14 @@ int ioctl_cmd(GPIO_t* instance, gpio_command_t cmd, void* val)
                 ret = ERROR;
             }
             break;
+        default:
+            break;
         }
         if(ret == ERROR)
             val = (void*)-1;
         return ret;   
     }
-
+    return SUCCESS;
 }
 int ioctl_is_exported(int num)
 {
@@ -529,7 +531,7 @@ int ioctl_cmd_set_active_low(int num, active_low_t val)
     strcat(path, GPIO_PATH);
     strcat(path, name);
     strcat(path, ACTIVE_LOW);
-    char str_val[1];
+    char str_val[2];
     sprintf(str_val, "%d" , (int)val);
     //itoa()
     fd = open(path, FILE_FLAGS, FILE_PERMS);
@@ -781,7 +783,7 @@ int ioctl_cmd_set_value(int num, gpio_value_t val)
     strcat(path, name);
     strcat(path, VALUE);
     //printf("%s\n", path);
-    char str_val[1];
+    char str_val[2];
     sprintf(str_val, "%d", (int)val);
     fd = open(path, FILE_FLAGS, FILE_PERMS);
     if(fd == -1)

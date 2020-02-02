@@ -23,15 +23,11 @@ int main(int argc, char** argv)
     GPIO_get_direction(&gpio17, &tmpDir);
     printf("Value=%d, Edge=%d, Dir=%d\n", tmpVal, tmpEd, tmpDir);
     //printf("Info of gpio%d:\n",gpio17.gpio_num);
-    //printf("num=%d, active_low=%d, dir=%d, value=%d\n",\
-	//         gpio17.gpio_num, gpio17.active_low, gpio17.direction, gpio17.value);
     sleep(2);
     GPIO_get_value(&gpio17, &tmpVal);
     GPIO_get_edge(&gpio17, &tmpEd);
     GPIO_get_direction(&gpio17, &tmpDir);
     printf("Value=%d, Edge=%d, Dir=%d\n", tmpVal, tmpEd, tmpDir);
-    // printf("num=%d, active_low=%d, dir=%d, value=%d\n",\
-	//         gpio17.gpio_num, gpio17.active_low, gpio17.direction, gpio17.value);
     // sleep(2);
 
     GPIO_Denit(&gpio17);
