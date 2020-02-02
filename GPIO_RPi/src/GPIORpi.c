@@ -28,6 +28,11 @@ int GPIO_Init_Default(GPIO_t* instance, int number)
         printf("Error: Cannot set direction gpio%d\n", instance->gpio_num);
         return ERROR;
     }
+    if(!GPIO_set_edge(instance, NONE))
+    {
+        printf("Error: Cannot set edge gpio%d\n", instance->gpio_num);
+        return ERROR;
+    }
 
     if(!GPIO_set_value(instance, HIGH))
     {
@@ -40,7 +45,7 @@ int GPIO_Init_Default(GPIO_t* instance, int number)
 }
 int GPIO_Init_Custom(GPIO_t* instance,\
             int number, direction_t dir,\
-            active_low_t act, gpio_value_t initVal)
+            active_low_t act, edge_t ed, gpio_value_t initVal)
 {
     instance->export_status = UNEXPORTED;
     instance->active_low = HIGH_ACTIVE;
@@ -70,6 +75,12 @@ int GPIO_Init_Custom(GPIO_t* instance,\
     if(!GPIO_set_direction( instance, dir ))
     {
         printf("Error: Cannot set direction gpio%d\n", instance->gpio_num);
+        return ERROR;
+    }
+    //printf("Init edge=%d\n", ed);
+    if(!GPIO_set_edge(instance, ed))
+    {
+        printf("Error: Cannot set edge gpio%d\n", instance->gpio_num);
         return ERROR;
     }
 
@@ -189,6 +200,25 @@ int GPIO_set_direction(GPIO_t* instance, direction_t dir)
     }
     //instance->direction = dir;
     return SUCCESS;   
+}
+int GPIO_set_edge(GPIO_t* instance, edge_t ed)
+{
+    if(!ioctl_cmd(instance, SET_EDGE_CMD, &ed))
+    {
+        printf("Error: ioctl cmd set edge gpio%d\n", instance->gpio_num);
+        return ERROR;
+    }
+    return SUCCESS;
+}
+
+int GPIO_get_edge(GPIO_t* instance, edge_t* retVal)
+{
+    if(!ioctl_cmd(instance, GET_EDGE_CMD, retVal))
+    {
+        printf("Error: ioctl cmd get edge gpio%d\n", instance->gpio_num);
+        return ERROR;
+    }
+    return SUCCESS;
 }
 
 int GPIO_get_active_low(GPIO_t* instance, active_low_t* retVal)
@@ -353,6 +383,8 @@ int ioctl_cmd(GPIO_t* instance, gpio_command_t cmd, void* val)
     else
     {
         export_t    tmpExport;
+        direction_t tmp;
+        int tmpNum;
         int dir_exist = ioctl_is_exported(instance->gpio_num);
         if(dir_exist == TRUE)
             tmpExport = EXPORTED;
@@ -382,14 +414,37 @@ int ioctl_cmd(GPIO_t* instance, gpio_command_t cmd, void* val)
             } 
             break;
         case SET_VALUE_CMD:
+            tmpNum = instance->gpio_num;
+            tmpNum += (int)(instance->direction) << 16;
+            if(!ioctl_cmd_get_dir(tmpNum, &tmp))
+            {
+                printf("Error: Cannot detect input/output\n");
+                ret = ERROR;
+                break;
+            }
+            if(tmp == INPUT)
+            {
+                ret = SUCCESS;
+                break;
+            }
             ret = (ioctl_cmd_set_value(instance->gpio_num, *((gpio_value_t*)val)))? SUCCESS : ERROR;
             if(ret == SUCCESS)
             {
                 instance->value = *((gpio_value_t*)val);
             }
             break;
+        case SET_EDGE_CMD:
+            ret = (ioctl_cmd_set_edge(instance->gpio_num, *((edge_t*)val)))? SUCCESS : ERROR;
+            if(ret == SUCCESS)
+            {
+                //printf("here set\n");
+                instance->edge = *((edge_t*)val);
+            }
+            break;
         case GET_DIR_CMD:
-            ret = (ioctl_cmd_get_dir(instance->gpio_num, (direction_t*)val))? SUCCESS : ERROR;
+            tmpNum = instance->gpio_num;
+            tmpNum += (int)(instance->direction) << 16;
+            ret = (ioctl_cmd_get_dir(tmpNum, (direction_t*)val))? SUCCESS : ERROR;
             if(ret == SUCCESS)
             {
                 if(instance->direction != *(direction_t*)val)
@@ -409,6 +464,18 @@ int ioctl_cmd(GPIO_t* instance, gpio_command_t cmd, void* val)
             if(ret == SUCCESS)
             {
                 if(instance->value != *(gpio_value_t*)val);
+                ret = ERROR;
+            }
+            break;
+        case GET_EDGE_CMD:
+            tmpNum = instance->gpio_num;
+            //printf("ioclt edge=%d\n", instance->edge);
+            tmpNum += (int)(instance->edge) << 16;
+            ret = (ioctl_cmd_get_edge(tmpNum, (edge_t*)val))? SUCCESS : ERROR;
+            if(ret == SUCCESS)
+            {
+                //printf("here get\n");
+                if(instance->edge != *(edge_t*)val);
                 ret = ERROR;
             }
             break;
@@ -440,8 +507,6 @@ int ioctl_is_exported(int num)
     {
         return FALSE;
     }
-    
-
 }
 
 //All below function directly run on file:
@@ -541,26 +606,36 @@ int ioctl_cmd_set_dir(int num, direction_t dir)
     strcat(path, name);
     strcat(path, DIRECTION);
     //printf("%s\n", path);
-    char str_val[3] = {0};
+    char str_val[4] = {0};
+    //char *str_val;
     if(dir == OUTPUT)
     {
-        size = 3;
+        size = 4;
+        //str_val = (char*)malloc((size+1)*sizeof(char));
         strcat(str_val, "out");
+    }
+    else if(dir == INPUT)
+    {
+        size = 3;
+        //str_val = (char*)malloc((size+1)*sizeof(char));
+        strcat(str_val, "in");
     }
     else
     {
-        size = 2;
-        strcat(str_val, "in");
+        printf("Invalid type\n");
+        return ERROR;
     }
+    
         
     //fprintf(str_val, "%d", (int)val);
+    //printf("set dir: %s\n", str_val);
     fd = open(path, FILE_FLAGS, FILE_PERMS);
     if(fd == -1)
     {
         printf("Error: ioctl cmd set dir open file\n");
         return ERROR;
     }
-    if(write(fd, str_val, size) != size)
+    if(write(fd, str_val, size-1) != size-1)
     {
         printf("Error : ioctl cmd set dir write file\n");
         return ERROR;
@@ -568,6 +643,132 @@ int ioctl_cmd_set_dir(int num, direction_t dir)
     close(fd);
     return SUCCESS;
 }
+
+int ioctl_cmd_set_edge(int num, edge_t ed)
+{
+int fd, size;
+    char name[MAX_NAME_SIZE] = {0}, number_char[MAX_PIN_SIZE] ={0};
+    strcat(name, GPIO_PREFIX);
+    sprintf(number_char, "%d", num);
+    strcat(name, number_char);
+    char path[MAX_PATH_SIZE]={0};
+    strcat(path, GPIO_PATH);
+    strcat(path, name);
+    strcat(path, EDGE);
+    //printf("%s\n", path);
+    //char* str_val;
+    char str_val[8] = {0};
+    if(ed == NONE)
+    {
+        size = 5;
+        //str_val = (char*)malloc((size+1)*sizeof(char));
+        strcat(str_val, "none");
+    }
+    else if(ed == RISING)
+    {
+        size = 7;
+        //str_val = (char*)malloc((size+1)*sizeof(char));
+        strcat(str_val, "rising");
+    }
+    else if(ed == FALLING)
+    {
+        size = 8;
+        //str_val = (char*)malloc((size+1)*sizeof(char));
+        strcat(str_val, "falling");
+    }
+    else if(ed == BOTH)
+    {
+        size = 5;
+        //str_val = (char*)malloc((size+1)*sizeof(char));
+        strcat(str_val, "both");
+    }
+    else
+    {
+        printf("Invalid type\n");
+        return ERROR;
+    }
+
+    
+    //fprintf(str_val, "%d", (int)val);
+    //printf("set edge: %s\n", str_val);
+    fd = open(path, FILE_FLAGS, FILE_PERMS);
+    if(fd == -1)
+    {
+        printf("Error: ioctl cmd set edge open file\n");
+        return ERROR;
+    }
+    if(write(fd, str_val, size-1) != size-1)
+    {
+        printf("Error : ioctl cmd set edge write file\n");
+        return ERROR;
+    }
+    close(fd);
+    return SUCCESS;
+}
+
+int ioctl_cmd_get_edge(int num, edge_t* val)
+{
+    int gpionum = num & LOW_HALF;
+    int edge = (num & HIGH_HALF) >> 16;
+
+    //printf("gpionum=%d\n", gpionum);
+    //printf("edge=%d\n", edge);
+    int size=0;
+    if(edge == FALLING)
+        size = 8;
+    else if(edge == RISING)
+        size = 7;
+    else if(edge == NONE || edge == BOTH)
+        size = 5;
+    int fd;
+    char name[MAX_NAME_SIZE] = {0}, number_char[MAX_PIN_SIZE] ={0};
+    strcat(name, GPIO_PREFIX);
+    sprintf(number_char, "%d", gpionum);
+    strcat(name, number_char);
+    char path[MAX_PATH_SIZE]={0};
+    strcat(path, GPIO_PATH);
+    strcat(path, name);
+    strcat(path, EDGE);
+        //printf("%s\n", path);
+    char str_val[size];
+
+    fd = open(path, FILE_FLAGS, FILE_PERMS);
+    if(fd == -1)
+    {
+        printf("Error: ioctl cmd get edge open file\n");
+        return ERROR;
+    }
+    if(read(fd, str_val, size-1) != size-1)
+    {
+        printf("Error : ioctl cmd get edge read file\n");
+        return ERROR;
+    }
+    str_val[size-1] = '\0';
+    //printf("%s\n", str_val);
+    if(strcmp(str_val, "falling") == 0)
+    {
+        *val = FALLING;
+    }
+    else if(strcmp(str_val, "rising") == 0)
+    {
+        //printf("here\n");
+        *val = RISING;
+    }
+    else if(strcmp(str_val, "none") == 0)
+    {
+        *val = NONE;
+    }
+    else if(strcmp(str_val, "both") == 0)
+    {
+        *val = BOTH;
+    }
+    else{
+        //do nothing
+    }
+    close(fd);
+    return SUCCESS;
+}
+
 int ioctl_cmd_set_value(int num, gpio_value_t val)
 {
     int fd;
@@ -590,7 +791,7 @@ int ioctl_cmd_set_value(int num, gpio_value_t val)
     }
     if(write(fd, str_val, 1) != 1)
     {
-        printf("Error : ioctl set value write file\n");
+        printf("Error : ioctl cmd set value write file\n");
         return ERROR;
     }
     close(fd);
@@ -613,12 +814,12 @@ int ioctl_cmd_get_value(int num, gpio_value_t* val)
     fd = open(path, FILE_FLAGS, FILE_PERMS);
     if(fd == -1)
     {
-        printf("Error: ioctl cmd set value open file\n");
+        printf("Error: ioctl cmd get value open file\n");
         return ERROR;
     }
     if(read(fd, &str_val, 1) != 1)
     {
-        printf("Error : ioctl set value write file\n");
+        printf("Error : ioctl cmd get value write file\n");
         return ERROR;
     }
     int tmp = atoi(&str_val);
@@ -629,10 +830,21 @@ int ioctl_cmd_get_value(int num, gpio_value_t* val)
 
 int ioctl_cmd_get_dir(int num, direction_t* val)
 {
-    int fd, size = 3;
+    int gpionum = num & LOW_HALF;
+    //printf("gpionum=%d\n", gpionum);
+
+    int dir = (num & HIGH_HALF) >> 16;
+    //printf("dir=%d\n", dir);
+    int size= 0;
+    if(dir == OUTPUT)
+        size = 4;
+    else if(dir == INPUT)
+        size = 3;
+    
+    int fd;
     char name[MAX_NAME_SIZE] = {0}, number_char[MAX_PIN_SIZE] ={0};
     strcat(name, GPIO_PREFIX);
-    sprintf(number_char, "%d", num);
+    sprintf(number_char, "%d", gpionum);
     strcat(name, number_char);
     char path[MAX_PATH_SIZE]={0};
     strcat(path, GPIO_PATH);
@@ -646,11 +858,13 @@ int ioctl_cmd_get_dir(int num, direction_t* val)
         printf("Error: ioctl cmd get dir open file\n");
         return ERROR;
     }
-    if(read(fd, str_val, size) != size)
+    if(read(fd, str_val, size-1) != size-1)
     {
         printf("Error : ioctl cmd get dir write file\n");
         return ERROR;
     }
+    str_val[size-1] = '\0';
+    //printf("%s\n", str_val);
     if(strcmp(str_val, "out") == 0)
     {
         *val = OUTPUT;
